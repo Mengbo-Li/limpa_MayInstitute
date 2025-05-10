@@ -10,6 +10,11 @@ We will look at the HYE110 dataset (TripleTOF 6600; 64-variable-window acquisiti
 DIA-NN processed data were downloaded from https://osf.io/6g3ux/files/osfstorage. 
 This file only includes a simple run through of the limpa pipeline, with minimal data exploration and quality assessment (this is a good quality dataset). 
 
+Note: although here I demonstrate a DE pipeline using a mixed-species dataset, we do not recommend using mixed-species datasets for evaluation of DE pipelines or results. 
+
+
+
+
 
 
 # (Install and) Load packages
