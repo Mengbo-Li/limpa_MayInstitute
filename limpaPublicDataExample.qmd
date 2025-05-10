@@ -1,0 +1,112 @@
+---
+title: "limpa analysis on mixed-species data"
+format: html
+---
+
+# Summary
+
+Differential expression (DE) analysis on the 3-organism mixture data from LFQbench (https://ftp.pride.ebi.ac.uk/pride/data/archive/2016/09/PXD002952/). 
+We will look at the HYE110 dataset (TripleTOF 6600; 64-variable-window acquisition) processed by DIA-NN under the library-based mode, published in the DIA-NN 2020 paper. 
+DIA-NN processed data were downloaded from https://osf.io/6g3ux/files/osfstorage. 
+This file only includes a simple run through of the limpa pipeline, with minimal data exploration and quality assessment (this is a good quality dataset). 
+
+
+
+# (Install and) Load packages
+
+```{r}
+#| eval: false
+
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("limpa")
+```
+
+
+```{r}
+library(limpa)
+```
+
+
+# Data
+
+```{r}
+load("data/250510-mixedSpecies_cleaned.rda")
+```
+
+
+
+# limpa workflow
+
+## Fit DPC
+
+```{r}
+dpcfit <- dpc(dat)
+plotDPC(dpcfit)
+dpcfit$dpc
+```
+
+## Protein quantification by DPC-Quant
+
+```{r}
+pt <- dpcQuant(dat, dpc = dpcfit)
+dim(pt)
+```
+
+
+## DE analysis
+
+```{r}
+design <- model.matrix(~ 0 + Group, data = dat$samples)
+contr <- makeContrasts(BvsA = GroupB - GroupA, levels = design)
+
+fit <- dpcDE(pt, design)
+fit <- contrasts.fit(fit, contrasts = contr)
+fit <- eBayes(fit, robust = TRUE)
+
+summary(decideTests(fit))
+```
+
+
+Mean-difference plot
+
+```{r}
+species.col <- c("blue", "red", "black")
+
+plotMD(fit, coef = "BvsA", 
+       status = as.factor(pt$genes$Species), 
+       hl.col = species.col, 
+       hl.cex = 0.5, 
+       main = "Mean-difference plot (B vs A)")
+abline(h = log2(3/30), col = "blue")
+abline(h = 0, col = "black")
+abline(h = log2(30/3), col = "red")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Session informaiton
+
+```{r}
+sessionInfo()
+```
+
+
+
